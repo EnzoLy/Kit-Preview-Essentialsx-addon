@@ -36,7 +36,7 @@ public class ItemStackAdapter implements JsonDeserializer<ItemStack>, JsonSerial
             if (meta.hasDisplayName())
                 element.addProperty("name", meta.getDisplayName());
             if (meta.hasLore())
-                element.add("lore", (JsonElement)convertStringList(meta.getLore()));
+                element.add("lore", convertStringList(meta.getLore()));
             if (meta instanceof LeatherArmorMeta) {
                 element.addProperty("color", Integer.valueOf(((LeatherArmorMeta)meta).getColor().asRGB()));
             } else if (meta instanceof SkullMeta) {
@@ -44,30 +44,33 @@ public class ItemStackAdapter implements JsonDeserializer<ItemStack>, JsonSerial
             } else if (meta instanceof BookMeta) {
                 element.addProperty("title", ((BookMeta)meta).getTitle());
                 element.addProperty("author", ((BookMeta)meta).getAuthor());
-                element.add("pages", (JsonElement)convertStringList(((BookMeta)meta).getPages()));
+                element.add("pages", convertStringList(((BookMeta)meta).getPages()));
             } else if (meta instanceof PotionMeta) {
                 if (!((PotionMeta)meta).getCustomEffects().isEmpty())
-                    element.add("potion-effects", (JsonElement)convertPotionEffectList(((PotionMeta)meta).getCustomEffects()));
+                    element.add("potion-effects", convertPotionEffectList(((PotionMeta)meta).getCustomEffects()));
             } else if (meta instanceof MapMeta) {
                 element.addProperty("scaling", Boolean.valueOf(((MapMeta)meta).isScaling()));
             } else if (meta instanceof EnchantmentStorageMeta) {
                 JsonObject storedEnchantments = new JsonObject();
-                for (Map.Entry<Enchantment, Integer> entry : (Iterable<Map.Entry<Enchantment, Integer>>)((EnchantmentStorageMeta)meta).getStoredEnchants().entrySet())
-                    storedEnchantments.addProperty(((Enchantment)entry.getKey()).getName(), entry.getValue());
-                element.add("stored-enchants", (JsonElement)storedEnchantments);
+                for (Map.Entry<Enchantment, Integer> entry : ((EnchantmentStorageMeta)meta).getStoredEnchants().entrySet())
+                    storedEnchantments.addProperty(entry.getKey().getName(), entry.getValue());
+                element.add("stored-enchants", storedEnchantments);
+            }
+            if(meta.hasCustomModelData()){
+                element.addProperty("custom-metadata-model", meta.getCustomModelData());
             }
         }
         if (item.getEnchantments().size() != 0) {
             JsonObject enchantments = new JsonObject();
-            for (Map.Entry<Enchantment, Integer> entry : (Iterable<Map.Entry<Enchantment, Integer>>)item.getEnchantments().entrySet())
+            for (Map.Entry<Enchantment, Integer> entry : item.getEnchantments().entrySet())
                 enchantments.addProperty(((Enchantment)entry.getKey()).getName(), entry.getValue());
-            element.add("enchants", (JsonElement)enchantments);
+            element.add("enchants", enchantments);
         }
-        return (JsonElement)element;
+        return element;
     }
 
     public static ItemStack deserialize(JsonElement object) {
-        if (object == null || !(object instanceof JsonObject))
+        if (!(object instanceof JsonObject))
             return new ItemStack(Material.AIR);
         JsonObject element = (JsonObject)object;
         String type = element.get("type").getAsString();
@@ -99,6 +102,8 @@ public class ItemStackAdapter implements JsonDeserializer<ItemStack>, JsonSerial
                 if (enchantments.has(enchantment.getName()))
                     ((EnchantmentStorageMeta)meta).addStoredEnchant(enchantment, enchantments.get(enchantment.getName()).getAsInt(), true);
             }
+        }else if(element.has("custom-metada-model")){
+            meta.setCustomModelData(element.get("custom-metada-model").getAsInt());
         }
         item.setItemMeta(meta);
         if (element.has("enchants")) {
@@ -122,7 +127,7 @@ public class ItemStackAdapter implements JsonDeserializer<ItemStack>, JsonSerial
     public static JsonArray convertStringList(Collection<String> strings) {
         JsonArray ret = new JsonArray();
         for (String string : strings)
-            ret.add((JsonElement)new JsonPrimitive(string));
+            ret.add(new JsonPrimitive(string));
         return ret;
     }
 

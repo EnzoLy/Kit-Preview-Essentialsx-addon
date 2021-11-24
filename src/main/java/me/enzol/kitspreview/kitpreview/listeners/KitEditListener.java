@@ -1,14 +1,15 @@
 package me.enzol.kitspreview.kitpreview.listeners;
 
-import me.enzol.kitspreview.kitpreview.item.KitItem;
+import me.enzol.kitspreview.KitsPreview;
 import me.enzol.kitspreview.kitpreview.KitPreview;
-import me.enzol.kitspreview.utils.TaskUtil;
+import me.enzol.kitspreview.kitpreview.item.KitItem;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class KitEditListener implements Listener {
 
@@ -32,7 +33,13 @@ public class KitEditListener implements Listener {
         }
 
         player.sendMessage(ChatColor.GREEN + "Kit preview inventory saved");
-        TaskUtil.runAsync(kitPreview::save);
+
+        new BukkitRunnable(){
+            @Override
+            public void run() {
+                kitPreview.save();
+            }
+        }.runTaskAsynchronously(KitsPreview.getInstance());
     }
 
 }

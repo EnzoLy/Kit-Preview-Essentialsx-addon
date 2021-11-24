@@ -91,4 +91,17 @@ public class EssentialsUtils {
         }
         return item;
     }
+
+    public static boolean isNewVersion(){
+        String versionString = Bukkit.getPluginManager().getPlugin("Essentials").getDescription().getVersion();
+        int version = Integer.parseInt(getThirdString(versionString));
+        System.out.println(version);
+        return version > 18;
+    }
+
+    //Get thrid string from a string
+    private static String getThirdString(String string){
+        String[] strings = string.split("\\.");
+        return strings[1];
+    }
 }

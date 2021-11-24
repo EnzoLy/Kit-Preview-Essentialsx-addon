@@ -1,14 +1,16 @@
 package me.enzol.kitspreview.commands;
 
-import com.earth2me.essentials.Essentials;
 import me.enzol.kitspreview.KitsPreview;
-import me.enzol.kitspreview.kitpreview.listeners.InventoryListener;
 import me.enzol.kitspreview.kitpreview.KitPreview;
+import me.enzol.kitspreview.kitpreview.listeners.InventoryListener;
 import me.enzol.kitspreview.utils.Color;
 import me.enzol.kitspreview.utils.EssentialsUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.*;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -16,6 +18,7 @@ import org.bukkit.inventory.Inventory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class KitPreviewCommand implements CommandExecutor, TabExecutor{
@@ -69,10 +72,9 @@ public class KitPreviewCommand implements CommandExecutor, TabExecutor{
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String s, String[] args){
-        Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
-
+        Set<String> kits = KitsPreview.getInstance().getKits();
         if (args.length == 1) {
-            return new ArrayList<>(ess.getKits().getKits().getKeys(false)).stream()
+            return new ArrayList<>(kits).stream()
                 .filter(s1 -> s1.toLowerCase().startsWith(args[0]))
                 .collect(Collectors.toList());
         }
