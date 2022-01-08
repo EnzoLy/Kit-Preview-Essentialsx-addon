@@ -1,46 +1,56 @@
 package me.enzol.kitspreview.kitpreview.listeners;
 
-import com.google.common.collect.Lists;
-import org.bukkit.entity.Player;
+import me.enzol.kitspreview.KitsPreview;
+import me.enzol.kitspreview.utils.Color;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-
-import java.util.List;
-import java.util.UUID;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 public class InventoryListener implements Listener{
-	
-    public static List<UUID> inventorysOpen = Lists.newArrayList();
+
+    private final KitsPreview plugin = KitsPreview.getInstance();
+    private final Configuration config = plugin.getConfig();
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event){
-        Player player = (Player)event.getWhoClicked();
-        if(inventorysOpen.contains(player.getUniqueId())) event.setCancelled(true);
-    }
+        String title = Color.translate(config.getString("gui.title").replace("{kit}", ""));
+        ItemStack item = event.getCurrentItem();
 
-    @EventHandler
-    public void onInventoryDrag(InventoryDragEvent event){
-        Player player = (Player)event.getWhoClicked();
-        if(inventorysOpen.contains(player.getUniqueId())) event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onInventoryClose(InventoryCloseEvent event){
-        Player player = (Player)event.getPlayer();
-        if(inventorysOpen.contains(player.getUniqueId())){
-            inventorysOpen.remove(player.getUniqueId());
-            player.updateInventory();
+        InventoryView inventory = event.getView();
+        if(inventory.getTitle().contains(title)){
+            event.setCancelled(true);
+        }else{
+            if(item == null){
+              item = inventory.getItem(event.getSlot());
+            }
+            if(item != null && item.getItemMeta() != null) {
+                ItemMeta meta = item.getItemMeta();
+                PersistentDataContainer container = meta.getPersistentDataContainer();
+                if(container.has(plugin.getNamespacedKey(), PersistentDataType.STRING)){
+                    event.setCurrentItem(null);
+                    event.setCancelled(true);
+                }
+            }
         }
     }
 
     @EventHandler
-    public void onQuit(PlayerQuitEvent event){
-        Player player = event.getPlayer();
-        inventorysOpen.remove(player.getUniqueId());
+    public void onItemDrop(PlayerDropItemEvent event){
+        ItemStack itemStack = event.getItemDrop().getItemStack();
+        if(itemStack.getItemMeta() != null){
+            ItemMeta meta = itemStack.getItemMeta();
+            PersistentDataContainer container = meta.getPersistentDataContainer();
+            if(container.has(plugin.getNamespacedKey(), PersistentDataType.STRING)){
+                event.getItemDrop().remove();
+            }
+        }
     }
 
 }

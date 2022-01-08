@@ -13,12 +13,11 @@ import me.enzol.kitspreview.kitpreview.listeners.InventoryListener;
 import me.enzol.kitspreview.kitpreview.listeners.KitEditListener;
 import me.enzol.kitspreview.sign.SignListener;
 import me.enzol.kitspreview.utils.Color;
-import me.enzol.kitspreview.utils.EssentialsUtils;
 import me.enzol.kitspreview.utils.adaters.ItemStackAdapter;
 import me.enzol.kitspreview.utils.adaters.PotionEffectAdapter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
@@ -26,14 +25,13 @@ import org.bukkit.potion.PotionEffect;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Set;
 
 public class KitsPreview extends JavaPlugin{
 
     @Getter private static KitsPreview instance;
-    @Getter private static Gson gson = new GsonBuilder()
+    @Getter private final NamespacedKey namespacedKey = new NamespacedKey(this, "kitpreview");
+    @Getter private static final Gson gson = new GsonBuilder()
         .registerTypeHierarchyAdapter(ItemStack.class, new ItemStackAdapter())
         .registerTypeHierarchyAdapter(PotionEffect.class, new PotionEffectAdapter())
         .serializeNulls()
@@ -93,12 +91,7 @@ public class KitsPreview extends JavaPlugin{
 
     public Set<String> getKits(){
         Essentials ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
-        CommentedConfigurationNode kits = ess.getKits().getKits();
-        return ConfigurateUtil.getKeys(kits);
-    }
-
-    public String getSpigotVersion(){
-        return getServer().getClass().getPackage().getName().substring(getServer().getClass().getPackage().getName().lastIndexOf('.') + 1);
+        return ess.getKits().getKitKeys();
     }
 
     private void checkConfig() {
