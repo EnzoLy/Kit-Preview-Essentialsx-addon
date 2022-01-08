@@ -7,6 +7,7 @@ import me.enzol.kitspreview.utils.Color;
 import me.enzol.kitspreview.utils.EssentialsUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,6 +15,9 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,8 +27,8 @@ import java.util.stream.Collectors;
 
 public class KitPreviewCommand implements CommandExecutor, TabExecutor{
 
-    private static KitsPreview plugin = KitsPreview.getInstance();
-    private static Configuration config = plugin.getConfig();
+    private final KitsPreview plugin = KitsPreview.getInstance();
+    private final Configuration config = plugin.getConfig();
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args){
@@ -58,16 +62,23 @@ public class KitPreviewCommand implements CommandExecutor, TabExecutor{
             Color.translate(config.getString("gui.title").replace("{kit}", kitName)));
 
         if(kitPreview.getItems().isEmpty()){
-            EssentialsUtils.getItems(player, kitName).forEach(inventory::addItem);
+            EssentialsUtils.getItems(player, kitName).forEach(item -> inventory.addItem(addCustomTag(item, kitName)));
         }else {
-            kitPreview.getItems().forEach(kitItem -> inventory.setItem(kitItem.getSlot(), kitItem.getItem()));
+            kitPreview.getItems().forEach(kitItem -> inventory.setItem(kitItem.getSlot(), addCustomTag(kitItem.getItem(), kitName)));
         }
 
         player.openInventory(inventory);
 
-        InventoryListener.inventorysOpen.add(player.getUniqueId());
-
         return true;
+    }
+
+    private ItemStack addCustomTag(ItemStack item, String name){
+        ItemStack itemStack = item.clone();
+        ItemMeta meta = itemStack.getItemMeta();
+        if(meta == null) return itemStack;
+        meta.getPersistentDataContainer().set(plugin.getNamespacedKey(), PersistentDataType.STRING, name);
+        itemStack.setItemMeta(meta);
+        return itemStack;
     }
 
     @Override

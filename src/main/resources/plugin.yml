@@ -1,5 +1,5 @@
 name: KitPreview
-version: 2.2
+version: 2.4
 main: me.enzol.kitspreview.KitsPreview
 api-version: 1.16
 load: POSTWORLD

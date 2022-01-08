@@ -17,7 +17,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class KitPreview {
 
-    @Getter private static Map<String, KitPreview> kits = Maps.newHashMap();
+    @Getter private static final Map<String, KitPreview> kits = Maps.newHashMap();
 
     private String kitName;
     @Setter private int rows;
