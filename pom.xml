@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>me.enzol.kitspreview</groupId>
-    <artifactId>Kit-Preview-Essentialsx-addon</artifactId>
+    <artifactId>kit-preview-essentialsx-addon</artifactId>
     <version>2.4</version>
 
     <properties>
